@@ -1,0 +1,74 @@
+---
+title: "Statistical Inference Course Project[Part 2]"
+author: "Sriram Vadlamani"
+output:
+  pdf_document:
+    fig_height: 3
+    fig_width: 5
+---
+
+In the second part of the project, we analyze the `ToothGrowth` data in the R
+datasets package. 
+
+
+#1. Load the ToothGrowth data and perform some basic exploratory data analyses 
+
+```{r}
+#Load the libraries
+library(datasets)
+library(ggplot2)
+
+#Explore the data with str and summary
+str(ToothGrowth)
+summary(ToothGrowth)
+
+```
+#2. Provide a basic summary of the data.
+ToothGrowth dataset has 60 observations for 3 categories - length, supplement and dose. Possible dose level values are 0.5, 1, 2. Supplement or the delivery methods are orange juice or ascorbic acid. 
+
+```{r}
+#Plot the data
+ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=supp)) +
+    geom_bar(stat="identity",) +
+    facet_grid(. ~ supp) +
+    xlab("Dose in miligrams") +
+    ylab("Tooth Length") +
+    guides(fill=guide_legend(title="Delivery Method"))
+```
+
+
+From the picture above, there is a clear correlation between the
+tooth length and the dose levels of Vitamin C, for both delivery methods - Orange Juice and Ascorbic Acide. 
+
+The effect of the dose can also be identified using regression analysis. 
+
+
+#3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. 
+```{r}
+fit <- lm(len ~ dose + supp, data=ToothGrowth)
+summary(fit)
+```
+
+The model explains 70.38% of the variance in the data. 
+
+1. The intercept is `r fit$coefficients[[1]]`, which means with no supplement of Vitamin C, the average tooth length would be `r fit$coefficients[[1]]` units. 
+
+2. The coefficient of `dose` is `r fit$coefficients[[2]]`. Increasing the delievered dose by 1 mg, everything else being equal, would increase the tooth length `r fit$coefficients[[2]]` units.
+
+3. The last coefficient is for the supplement type. Since the supplement type is a categorical variable, dummy variables are used. 
+
+4. The computed coefficient is for `suppVC` and the value is `r fit$coefficients[[3]]` which means delivering
+a given dose as ascorbic acid, without changing the dosage, would result in `r abs(fit$coefficients[[3]])` units of decrease in the tooth length. Since there are only two categories, we can also conclude that on average, delivering the dosage as orange juice would increase the tooth length by `r abs(fit$coefficients[[3]])` units.
+
+
+#4. Conclusions and the assumptions needed for conclusions
+95% confidence intervals for two variables and the intercept are as follows.
+```{r}
+confint(fit)
+```
+
+From the above results, it's clear that - the three coefficients intercept, dosage and delivery type - have an effect on growth of teeth in guinea pigs as the 95% confidence interval results shows.
+
+##Assumptions
+1. The distribution is normal
+2. The pigs provided is a random sample but is representative of the population.
